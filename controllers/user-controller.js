@@ -47,13 +47,12 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     const { id } = req.params
+    const loginUserId = getUser(req).id
     try {
-      if (getUser(req).id !== Number(id)) {
-        throw new Error('無法存取非本人帳戶!')
-      }
       const foundUser = await User.findByPk(id, { raw: true })
 
       if (!foundUser) throw new Error('使用者不存在!')
+
       // - 查詢跟目前  user 相關資訊
       const [userData, userComments] = await Promise.all([
         User.findByPk(id, {
@@ -81,7 +80,8 @@ const userController = {
       ])
       return res.render('users/profile', {
         user: userData.toJSON(),
-        userComments
+        userComments,
+        loginUserId
       })
     } catch (error) {
       return next(error)
