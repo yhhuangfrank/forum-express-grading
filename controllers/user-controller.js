@@ -47,7 +47,6 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     const { id } = req.params
-    const loginUserId = getUser(req).id
     try {
       const foundUser = await User.findByPk(id, { raw: true })
 
@@ -80,8 +79,7 @@ const userController = {
       ])
       return res.render('users/profile', {
         user: userData.toJSON(),
-        userComments,
-        loginUserId
+        userComments
       })
     } catch (error) {
       return next(error)
