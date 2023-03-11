@@ -51,14 +51,38 @@ const userController = {
       if (getUser(req).id !== Number(id)) {
         throw new Error('無法存取非本人帳戶!')
       }
-      let user = await User.findByPk(id, {
-        nest: true,
-        include: [{ model: Comment, include: [Restaurant] }],
-        order: [[Comment, 'created_at', 'DESC']]
+      const foundUser = await User.findByPk(id, { raw: true })
+
+      if (!foundUser) throw new Error('使用者不存在!')
+      // - 查詢跟目前  user 相關資訊
+      const [userData, userComments] = await Promise.all([
+        User.findByPk(id, {
+          include: [
+            {
+              model: Restaurant,
+              as: 'FavoritedRestaurants',
+              attributes: ['id', 'image']
+            },
+            { model: User, as: 'Followers', attributes: ['id', 'image'] },
+            { model: User, as: 'Followings', attributes: ['id', 'image'] }
+          ],
+          nest: true
+        }),
+        Comment.findAll({
+          include: [
+            { model: Restaurant, attributes: ['id', 'image'], required: true }
+          ],
+          group: 'Restaurant.id',
+          having: { userId: id },
+          order: [['created_at', 'DESC']],
+          nest: true,
+          raw: true
+        })
+      ])
+      return res.render('users/profile', {
+        user: userData.toJSON(),
+        userComments
       })
-      if (!user) throw new Error('使用者不存在!')
-      user = user.toJSON()
-      return res.render('users/profile', { user })
     } catch (error) {
       return next(error)
     }
