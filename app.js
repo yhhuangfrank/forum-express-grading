@@ -25,7 +25,10 @@ app.engine(
   })
 )
 app.set('view engine', 'hbs')
+
 app.use(express.urlencoded({ extended: true }))
+app.use(express.json()) // - 解析 json 格式的 req 傳送
+
 app.use(
   session({
     secret: SESSION_SECRET,
@@ -45,7 +48,7 @@ app.use((req, res, next) => {
   res.locals.loginUser = getUser(req)
   next()
 })
-app.use('/api', apis)
+app.use('/api', apis) // - api 路徑導向 api 專用 route
 app.use(pages)
 
 app.listen(port, () => {

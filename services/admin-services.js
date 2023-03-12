@@ -38,6 +38,27 @@ const adminServices = {
     } catch (error) {
       return cb(error)
     }
+  },
+  postRestaurant: async (req, cb) => {
+    const { name, tel, address, openingHours, description, categoryId } =
+      req.body
+    const { file } = req // - 取圖片檔
+    try {
+      if (!name) throw new Error('Restaurant name is required!')
+      const filePath = await imgurFileHandler(file)
+      const newRestaurant = await Restaurant.create({
+        name,
+        tel,
+        address,
+        openingHours,
+        description,
+        image: filePath || null,
+        categoryId
+      })
+      return cb(null, { restaurant: newRestaurant })
+    } catch (error) {
+      return cb(error)
+    }
   }
 }
 
