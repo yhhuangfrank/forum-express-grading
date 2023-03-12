@@ -1,7 +1,7 @@
 // - 處理屬於前台restaurant路由的相關請求
-const { Restaurant, Category, User, Comment, sequelize } = require('../models')
-const { getUser } = require('../helpers/auth-helpers')
-const { getOffset, getPagination } = require('../helpers/pagination-helper')
+const { Restaurant, Category, User, Comment, sequelize } = require('../../models')
+const { getUser } = require('../../helpers/auth-helpers')
+const { getOffset, getPagination } = require('../../helpers/pagination-helper')
 const restaurantController = {
   getRestaurants: async (req, res, next) => {
     const DEFAULT_LIMIT = 9

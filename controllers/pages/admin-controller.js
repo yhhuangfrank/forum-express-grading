@@ -1,7 +1,7 @@
 // - 處理屬於restaurant路由的相關請求
-const { Restaurant, User, Category } = require('../models')
-const { imgurFileHandler } = require('../helpers/file-helpers')
-const { getOffset, getPagination } = require('../helpers/pagination-helper')
+const { Restaurant, User, Category } = require('../../models')
+const { imgurFileHandler } = require('../../helpers/file-helpers')
+const { getOffset, getPagination } = require('../../helpers/pagination-helper')
 const adminController = {
   getRestaurants: async (req, res, next) => {
     const DEFAULT_LIMIT = 8
