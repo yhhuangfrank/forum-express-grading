@@ -23,6 +23,21 @@ const adminServices = {
     } catch (error) {
       return cb(error)
     }
+  },
+  deleteRestaurant: async (req, cb) => {
+    const { id } = req.params
+    try {
+      const restaurant = await Restaurant.findByPk(id)
+      if (!restaurant) {
+        const err = new Error('此餐廳不存在!')
+        err.status = 404
+        throw err
+      }
+      const deletedRestaurant = await restaurant.destroy()
+      return cb(null, { restaurant: deletedRestaurant })
+    } catch (error) {
+      return cb(error)
+    }
   }
 }
 

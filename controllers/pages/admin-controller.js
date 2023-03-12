@@ -97,15 +97,11 @@ const adminController = {
     }
   },
   deleteRestaurant: async (req, res, next) => {
-    const { id } = req.params
-    try {
-      const restaurant = await Restaurant.findByPk(id)
-      if (!restaurant) return new Error('此餐廳不存在!')
-      await restaurant.destroy()
+    adminServices.deleteRestaurant(req, (err, data) => {
+      if (err) return next(err)
+      req.session.deletedDate = data // - 將被刪除資料存入 session 中
       return res.redirect('/admin/restaurants')
-    } catch (error) {
-      return next(error)
-    }
+    })
   },
   getUsers: async (req, res, next) => {
     try {

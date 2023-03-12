@@ -2,9 +2,11 @@
 const router = require('express').Router()
 const admin = require('./modules/admin')
 const restController = require('../../controllers/apis/restaurant-controller')
-
+const { apiErrorHandler } = require('../../middleware/error-handler')
 router.use('/admin', admin)
 
 router.get('/restaurants', restController.getRestaurants)
+
+router.use('/', apiErrorHandler) // - api 專用 error handler
 
 module.exports = router
