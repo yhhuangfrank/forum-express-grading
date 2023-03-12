@@ -6,7 +6,8 @@ const {
   Restaurant,
   Favorite,
   Like,
-  Followship
+  Followship,
+  sequelize
 } = require('../../models')
 const { getUser } = require('../../helpers/auth-helpers')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
@@ -68,10 +69,12 @@ const userController = {
         }),
         Comment.findAll({
           include: [
-            { model: Restaurant, attributes: ['id', 'image'], required: true }
+            { model: Restaurant, attributes: ['image'], required: true }
           ],
-          group: 'Restaurant.id',
-          having: { userId: id },
+          attributes: [
+            [sequelize.fn('DISTINCT', sequelize.col('Restaurant.id')), 'restaurantId']
+          ],
+          where: { userId: id },
           order: [['created_at', 'DESC']],
           nest: true,
           raw: true
