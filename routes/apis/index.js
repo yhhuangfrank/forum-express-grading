@@ -18,6 +18,7 @@ router.post(
   passport.authenticate('local', { session: false }),
   userController.signIn
 )
+router.post('/signup', userController.signUp)
 
 router.use('/', apiErrorHandler) // - api 專用 error handler
 
