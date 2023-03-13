@@ -1,13 +1,16 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
+const passportJWT = require('passport-jwt')
 const bcrypt = require('bcryptjs')
 const { User, Restaurant } = require('../models')
+
+const JWTStrategy = passportJWT.Strategy
+const ExtractJWT = passportJWT.ExtractJwt
 
 module.exports = app => {
   // - initialize and session
   app.use(passport.initialize())
   app.use(passport.session())
-
   // - LocalStrategy
   passport.use(
     new LocalStrategy(
@@ -40,6 +43,35 @@ module.exports = app => {
         }
       }
     )
+  )
+
+  // - JWT Strategy
+  const jwtOptions = {
+    // - 從 Header 的 Bearer 抽取 token
+    jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
+    secretOrKey: process.env.JWT_SECRET // - 設定使用密鑰來檢查
+  }
+  passport.use(
+    new JWTStrategy(jwtOptions, async (jwtPayload, done) => {
+      try {
+        // - 解析 payload 並進行反查 User 是否存在
+        const foundUser = await User.findByPk(jwtPayload.id, {
+          include: [
+            { model: Restaurant, as: 'FavoritedRestaurants' },
+            { model: Restaurant, as: 'LikedRestaurants' },
+            { model: User, as: 'Followers' },
+            { model: User, as: 'Followings' }
+          ]
+        })
+
+        if (!foundUser) return done(null, false)
+
+        // - 將查詢到的 user 資訊存入 req.user
+        return done(null, foundUser)
+      } catch (error) {
+        return done(error, null)
+      }
+    })
   )
 
   // - serialization & deserialization

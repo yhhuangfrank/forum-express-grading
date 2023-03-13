@@ -36,7 +36,9 @@ app.use(
     resave: false
   })
 )
+
 usePassport(app)
+
 app.use(flash())
 app.use(methodOverride('_method'))
 // - 存取上傳圖片(static file)
