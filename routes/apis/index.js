@@ -27,6 +27,8 @@ router.get(
   authenticated,
   userController.getCommentedRestaurants
 )
+router.get('/users/:id/follower', authenticated, userController.getFollowers)
+router.get('/users/:id/following', authenticated, userController.getFollowings)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put(
   '/users/:id',

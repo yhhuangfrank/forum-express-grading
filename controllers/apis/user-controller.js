@@ -72,6 +72,16 @@ const userController = {
     userServices.getCommentedRestaurants(req, (err, data) =>
       err ? next(err) : res.json({ status: 'success', data })
     )
+  },
+  getFollowers: (req, res, next) => {
+    userServices.getFollowers(req, (err, data) =>
+      err ? next(err) : res.json({ status: 'success', data })
+    )
+  },
+  getFollowings: (req, res, next) => {
+    userServices.getFollowings(req, (err, data) =>
+      err ? next(err) : res.json({ status: 'success', data })
+    )
   }
 }
 

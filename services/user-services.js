@@ -208,9 +208,14 @@ const userServices = {
   getFavoritedRestaurants: async (req, cb) => {
     const { id } = req.params
     try {
-      const foundUser = await User.findByPk(id, { raw: true })
+      const foundUser = await User.findByPk(id, {
+        include: [{ model: Restaurant, as: 'FavoritedRestaurants' }],
+        raw: true,
+        nest: true
+      })
       if (!foundUser) throw new Error('沒有此使用者!')
-      const { FavoritedRestaurants } = getUser(req)
+      console.log(foundUser)
+      const { FavoritedRestaurants } = foundUser
       return cb(null, { FavoritedRestaurants })
     } catch (error) {
       return cb(error)
@@ -236,6 +241,36 @@ const userServices = {
       })
       commentedRestaurants.forEach(cr => delete cr.restaurantId)
       return cb(null, { commentedRestaurants })
+    } catch (error) {
+      return cb(error)
+    }
+  },
+  getFollowers: async (req, cb) => {
+    const { id } = req.params
+    try {
+      const foundUser = await User.findByPk(id, {
+        include: [{ model: User, as: 'Followers' }],
+        nest: true
+      })
+      if (!foundUser) throw new Error('沒有此使用者!')
+      const { Followers } = foundUser.toJSON()
+      Followers.map(f => delete f.password)
+      return cb(null, { Followers })
+    } catch (error) {
+      return cb(error)
+    }
+  },
+  getFollowings: async (req, cb) => {
+    const { id } = req.params
+    try {
+      const foundUser = await User.findByPk(id, {
+        include: [{ model: User, as: 'Followings' }],
+        nest: true
+      })
+      if (!foundUser) throw new Error('沒有此使用者!')
+      const { Followings } = foundUser.toJSON()
+      Followings.map(f => delete f.password)
+      return cb(null, { Followings })
     } catch (error) {
       return cb(error)
     }
