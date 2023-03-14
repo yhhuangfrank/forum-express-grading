@@ -11,6 +11,7 @@ const {
 const userServices = require('../../services/user-services')
 const { getUser } = require('../../helpers/auth-helpers')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
+
 const userController = {
   signUpPage: (req, res) => {
     return res.render('signup')
@@ -51,27 +52,12 @@ const userController = {
     })
   },
   putUser: async (req, res, next) => {
-    const { id } = req.params
-    const { name } = req.body
-    const { file } = req
-    try {
-      if (getUser(req).id !== Number(id)) {
-        throw new Error('無法存取非本人帳戶!')
-      }
-      if (!name) throw new Error('名稱為必填!')
-      const [user, filePath] = await Promise.all([
-        User.findByPk(id),
-        imgurFileHandler(file)
-      ])
-      await user.update({
-        name,
-        image: filePath || user.image
-      })
+    userServices.putUser(req, (err, data) => {
+      if (err) return next(err)
       req.flash('success_messages', '使用者資料編輯成功')
+      const { user } = data
       return res.redirect(`/users/${user.id}`)
-    } catch (error) {
-      return next(error)
-    }
+    })
   },
   addFavorite: async (req, res, next) => {
     const { restaurantId } = req.params

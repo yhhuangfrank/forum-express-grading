@@ -1,6 +1,7 @@
 const { User, Restaurant, Comment, sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../helpers/auth-helpers')
+const { imgurFileHandler } = require('../helpers/file-helpers')
 
 const userServices = {
   signUp: async (req, cb) => {
@@ -80,6 +81,28 @@ const userServices = {
       const user = await User.findByPk(id, { raw: true })
       if (!user) throw new Error('使用者不存在!')
       return cb(null, { user })
+    } catch (error) {
+      return cb(error)
+    }
+  },
+  putUser: async (req, cb) => {
+    const { id } = req.params
+    const { name } = req.body
+    const { file } = req
+    try {
+      if (getUser(req).id !== Number(id)) {
+        throw new Error('無法存取非本人帳戶!')
+      }
+      if (!name) throw new Error('名稱為必填!')
+      const [user, filePath] = await Promise.all([
+        User.findByPk(id),
+        imgurFileHandler(file)
+      ])
+      const updatedUser = await user.update({
+        name,
+        image: filePath || user.image
+      })
+      return cb(null, { user: updatedUser })
     } catch (error) {
       return cb(error)
     }
