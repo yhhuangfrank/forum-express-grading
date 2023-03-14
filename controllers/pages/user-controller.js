@@ -9,28 +9,19 @@ const {
   Followship,
   sequelize
 } = require('../../models')
+const userServices = require('../../services/user-services')
 const { getUser } = require('../../helpers/auth-helpers')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
 const userController = {
   signUpPage: (req, res) => {
     return res.render('signup')
   },
-  signUp: async (req, res, next) => {
-    const { name, email, password, passwordCheck } = req.body
-    // - 驗證表單
-    try {
-      if (password !== passwordCheck) {
-        throw new Error('Passwords do not match')
-      }
-      const foundUser = await User.findOne({ where: { email } })
-      if (foundUser) throw new Error('User already exists!')
-      const hash = bcrypt.hashSync(password, 10)
-      await User.create({ name, email, password: hash })
+  signUp: (req, res, next) => {
+    userServices.signUp(req, err => {
+      if (err) return next(err)
       req.flash('success_messages', '註冊成功! 可進行登入了!')
       return res.redirect('/signin')
-    } catch (error) {
-      return next(error)
-    }
+    })
   },
   signInPage: (req, res) => {
     return res.render('signin')
@@ -72,7 +63,10 @@ const userController = {
             { model: Restaurant, attributes: ['image'], required: true }
           ],
           attributes: [
-            [sequelize.fn('DISTINCT', sequelize.col('Restaurant.id')), 'restaurantId']
+            [
+              sequelize.fn('DISTINCT', sequelize.col('Restaurant.id')),
+              'restaurantId'
+            ]
           ],
           where: { userId: id },
           order: [['created_at', 'DESC']],
