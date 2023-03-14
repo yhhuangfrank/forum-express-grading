@@ -1,4 +1,4 @@
-const { User, Restaurant, Comment, sequelize } = require('../models')
+const { User, Restaurant, Comment, Favorite, sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../helpers/auth-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -103,6 +103,51 @@ const userServices = {
         image: filePath || user.image
       })
       return cb(null, { user: updatedUser })
+    } catch (error) {
+      return cb(error)
+    }
+  },
+  addFavorite: async (req, cb) => {
+    const { restaurantId } = req.params
+    const userId = getUser(req).id
+    try {
+      const [restaurant, favorite] = await Promise.all([
+        Restaurant.findByPk(restaurantId),
+        Favorite.findOne({
+          where: {
+            userId,
+            restaurantId
+          }
+        })
+      ])
+      if (!restaurant) throw new Error('餐廳不存在!')
+      if (favorite) throw new Error('你已收藏過此餐廳!')
+
+      const result = await Favorite.create({
+        userId,
+        restaurantId
+      })
+      return cb(null, { result })
+    } catch (error) {
+      return cb(error)
+    }
+  },
+  removeFavorite: async (req, cb) => {
+    const { restaurantId } = req.params
+    const userId = getUser(req).id
+    try {
+      const favorite = await Favorite.findOne({
+        where: {
+          userId,
+          restaurantId
+        }
+      })
+
+      if (!favorite) throw new Error('你尚未收藏過此餐廳!')
+
+      const deletedResult = await favorite.destroy()
+
+      return cb(null, { deletedResult })
     } catch (error) {
       return cb(error)
     }

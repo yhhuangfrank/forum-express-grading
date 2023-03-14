@@ -10,7 +10,6 @@ const {
 } = require('../../models')
 const userServices = require('../../services/user-services')
 const { getUser } = require('../../helpers/auth-helpers')
-const { imgurFileHandler } = require('../../helpers/file-helpers')
 
 const userController = {
   signUpPage: (req, res) => {
@@ -59,51 +58,19 @@ const userController = {
       return res.redirect(`/users/${user.id}`)
     })
   },
-  addFavorite: async (req, res, next) => {
-    const { restaurantId } = req.params
-    const userId = getUser(req).id
-    try {
-      const [restaurant, favorite] = await Promise.all([
-        Restaurant.findByPk(restaurantId),
-        Favorite.findOne({
-          where: {
-            userId,
-            restaurantId
-          }
-        })
-      ])
-      if (!restaurant) throw new Error('餐廳不存在!')
-      if (favorite) throw new Error('你已收藏過此餐廳!')
-
-      await Favorite.create({
-        userId,
-        restaurantId
-      })
+  addFavorite: (req, res, next) => {
+    userServices.addFavorite(req, err => {
+      if (err) return next(err)
       req.flash('success_messages', '收藏餐廳成功!')
       return res.redirect('back')
-    } catch (error) {
-      return next(error)
-    }
+    })
   },
   removeFavorite: async (req, res, next) => {
-    const { restaurantId } = req.params
-    const userId = getUser(req).id
-    try {
-      const favorite = await Favorite.findOne({
-        where: {
-          userId,
-          restaurantId
-        }
-      })
-
-      if (!favorite) throw new Error('你尚未收藏過此餐廳!')
-
-      await favorite.destroy()
+    userServices.removeFavorite(req, err => {
+      if (err) return next(err)
       req.flash('success_messages', '已取消收藏!')
       return res.redirect('back')
-    } catch (error) {
-      return next(error)
-    }
+    })
   },
   addLike: async (req, res, next) => {
     const { restaurantId } = req.params

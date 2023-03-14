@@ -30,6 +30,9 @@ router.post(
 )
 router.post('/signup', userController.signUp)
 
+router.post('/favorite/:restaurantId', authenticated, userController.addFavorite)
+router.delete('/favorite/:restaurantId', authenticated, userController.removeFavorite)
+
 router.use('/', apiErrorHandler) // - api 專用 error handler
 
 module.exports = router
