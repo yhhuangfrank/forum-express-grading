@@ -1,5 +1,6 @@
 const { User, Restaurant, Comment, sequelize } = require('../models')
 const bcrypt = require('bcryptjs')
+const { getUser } = require('../helpers/auth-helpers')
 
 const userServices = {
   signUp: async (req, cb) => {
@@ -66,6 +67,19 @@ const userServices = {
         user: userData.toJSON(),
         userComments
       })
+    } catch (error) {
+      return cb(error)
+    }
+  },
+  editUser: async (req, cb) => {
+    const { id } = req.params
+    try {
+      if (getUser(req).id !== Number(id)) {
+        throw new Error('無法存取非本人帳戶!')
+      }
+      const user = await User.findByPk(id, { raw: true })
+      if (!user) throw new Error('使用者不存在!')
+      return cb(null, { user })
     } catch (error) {
       return cb(error)
     }

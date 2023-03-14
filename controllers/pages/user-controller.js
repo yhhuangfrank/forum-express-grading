@@ -43,18 +43,12 @@ const userController = {
       return res.render('users/profile', { user, userComments })
     })
   },
-  editUser: async (req, res, next) => {
-    const { id } = req.params
-    try {
-      if (getUser(req).id !== Number(id)) {
-        throw new Error('無法存取非本人帳戶!')
-      }
-      const user = await User.findByPk(id, { raw: true })
-      if (!user) throw new Error('使用者不存在!')
+  editUser: (req, res, next) => {
+    userServices.editUser(req, (err, data) => {
+      if (err) return next(err)
+      const { user } = data
       return res.render('users/edit', { user })
-    } catch (error) {
-      return next(error)
-    }
+    })
   },
   putUser: async (req, res, next) => {
     const { id } = req.params
