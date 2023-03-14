@@ -1,4 +1,11 @@
-const { User, Restaurant, Comment, Favorite, sequelize } = require('../models')
+const {
+  User,
+  Restaurant,
+  Comment,
+  Favorite,
+  Followship,
+  sequelize
+} = require('../models')
 const bcrypt = require('bcryptjs')
 const { getUser } = require('../helpers/auth-helpers')
 const { imgurFileHandler } = require('../helpers/file-helpers')
@@ -123,11 +130,11 @@ const userServices = {
       if (!restaurant) throw new Error('餐廳不存在!')
       if (favorite) throw new Error('你已收藏過此餐廳!')
 
-      const result = await Favorite.create({
+      const createdFavorite = await Favorite.create({
         userId,
         restaurantId
       })
-      return cb(null, { result })
+      return cb(null, { createdFavorite })
     } catch (error) {
       return cb(error)
     }
@@ -145,9 +152,55 @@ const userServices = {
 
       if (!favorite) throw new Error('你尚未收藏過此餐廳!')
 
-      const deletedResult = await favorite.destroy()
+      const deletedFavorite = await favorite.destroy()
 
-      return cb(null, { deletedResult })
+      return cb(null, { deletedFavorite })
+    } catch (error) {
+      return cb(error)
+    }
+  },
+  addFollowing: async (req, cb) => {
+    const { userId } = req.params // -取得欲追蹤者 id
+    try {
+      if (Number(userId) === getUser(req).id) throw new Error('不能追蹤自己')
+
+      const [user, followship] = await Promise.all([
+        User.findByPk(userId),
+        Followship.findOne({
+          where: {
+            followerId: getUser(req).id,
+            followingId: userId
+          }
+        })
+      ])
+
+      if (!user) throw new Error('此使用者不存在!')
+      if (followship) throw new Error('您已追蹤此使用者!')
+
+      const createdFollowShip = await Followship.create({
+        followerId: getUser(req).id,
+        followingId: userId
+      })
+      return cb(null, { createdFollowShip })
+    } catch (error) {
+      return cb(error)
+    }
+  },
+  removeFollowing: async (req, cb) => {
+    const { userId } = req.params
+    try {
+      const followship = await Followship.findOne({
+        where: {
+          followerId: getUser(req).id,
+          followingId: userId
+        }
+      })
+
+      if (!followship) throw new Error('您尚未追蹤過此使用者!')
+
+      const deletedFollowship = await followship.destroy()
+
+      return cb(null, { deletedFollowship })
     } catch (error) {
       return cb(error)
     }

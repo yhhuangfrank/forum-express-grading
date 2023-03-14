@@ -14,7 +14,6 @@ router.use('/admin', authenticated, authenticatedAdmin, admin)
 
 router.get('/restaurants', authenticated, restController.getRestaurants)
 
-router.get('/users/:id/edit', authenticated, userController.editUser)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put(
   '/users/:id',
@@ -32,6 +31,9 @@ router.post('/signup', userController.signUp)
 
 router.post('/favorite/:restaurantId', authenticated, userController.addFavorite)
 router.delete('/favorite/:restaurantId', authenticated, userController.removeFavorite)
+
+router.post('/following/:userId', authenticated, userController.addFollowing)
+router.delete('/following/:userId', authenticated, userController.removeFollowing)
 
 router.use('/', apiErrorHandler) // - api 專用 error handler
 

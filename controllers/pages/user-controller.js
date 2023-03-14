@@ -1,13 +1,5 @@
 // - 處理屬於user路由的相關請求
-const {
-  User,
-  Comment,
-  Restaurant,
-  Favorite,
-  Like,
-  Followship,
-  sequelize
-} = require('../../models')
+const { User, Restaurant, Like } = require('../../models')
 const userServices = require('../../services/user-services')
 const { getUser } = require('../../helpers/auth-helpers')
 
@@ -138,49 +130,18 @@ const userController = {
     }
   },
   addFollowing: async (req, res, next) => {
-    const { userId } = req.params // -取得欲追蹤者 id
-    try {
-      const [user, followship] = await Promise.all([
-        User.findByPk(userId),
-        Followship.findOne({
-          where: {
-            followerId: getUser(req).id,
-            followingId: userId
-          }
-        })
-      ])
-
-      if (!user) throw new Error('此使用者不存在!')
-      if (followship) throw new Error('您已追蹤此使用者!')
-
-      await Followship.create({
-        followerId: getUser(req).id,
-        followingId: userId
-      })
+    userServices.addFollowing(req, err => {
+      if (err) return next(err)
       req.flash('success_messages', '追蹤成功!')
       return res.redirect('back')
-    } catch (error) {
-      return next(error)
-    }
+    })
   },
   removeFollowing: async (req, res, next) => {
-    const { userId } = req.params
-    try {
-      const followship = await Followship.findOne({
-        where: {
-          followerId: getUser(req).id,
-          followingId: userId
-        }
-      })
-
-      if (!followship) throw new Error('您尚未追蹤過此使用者!')
-
-      await followship.destroy()
+    userServices.removeFollowing(req, err => {
+      if (err) return next(err)
       req.flash('success_messages', '取消追蹤成功!')
       return res.redirect('back')
-    } catch (error) {
-      return next(error)
-    }
+    })
   }
 }
 

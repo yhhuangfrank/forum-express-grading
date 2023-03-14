@@ -29,14 +29,11 @@ const userController = {
     }
   },
   getUser: (req, res, next) => {
-    userServices.getUser(req, (err, data) =>
-      err ? next(err) : res.json({ status: 'success', data })
-    )
-  },
-  editUser: (req, res, next) => {
-    userServices.editUser(req, (err, data) =>
-      err ? next(err) : res.json({ status: 'success', data })
-    )
+    userServices.getUser(req, (err, data) => {
+      if (err) return next(err)
+      delete data.user.password
+      return res.json({ status: 'success', data })
+    })
   },
   putUser: (req, res, next) => {
     userServices.putUser(req, (err, data) =>
@@ -50,6 +47,16 @@ const userController = {
   },
   removeFavorite: (req, res, next) => {
     userServices.removeFavorite(req, (err, data) =>
+      err ? next(err) : res.json({ status: 'success', data })
+    )
+  },
+  addFollowing: (req, res, next) => {
+    userServices.addFollowing(req, (err, data) =>
+      err ? next(err) : res.json({ status: 'success', data })
+    )
+  },
+  removeFollowing: (req, res, next) => {
+    userServices.removeFollowing(req, (err, data) =>
       err ? next(err) : res.json({ status: 'success', data })
     )
   }
