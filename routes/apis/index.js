@@ -14,6 +14,7 @@ router.use('/admin', authenticated, authenticatedAdmin, admin)
 
 router.get('/restaurants', authenticated, restController.getRestaurants)
 
+router.get('/users/:id/favorite', authenticated, userController.getFavoritedRestaurants)
 router.get('/users/:id', authenticated, userController.getUser)
 router.put(
   '/users/:id',

@@ -1,6 +1,9 @@
 // - 引用 jwt 作為身分驗證
 const jwt = require('jsonwebtoken')
+
 const userServices = require('../../services/user-services')
+
+const { getUser } = require('../../helpers/auth-helpers')
 
 const userController = {
   signUp: (req, res, next) => {
@@ -57,6 +60,11 @@ const userController = {
   },
   removeFollowing: (req, res, next) => {
     userServices.removeFollowing(req, (err, data) =>
+      err ? next(err) : res.json({ status: 'success', data })
+    )
+  },
+  getFavoritedRestaurants: (req, res, next) => {
+    userServices.getFavoritedRestaurants(req, (err, data) =>
       err ? next(err) : res.json({ status: 'success', data })
     )
   }

@@ -204,6 +204,17 @@ const userServices = {
     } catch (error) {
       return cb(error)
     }
+  },
+  getFavoritedRestaurants: async (req, cb) => {
+    const { id } = req.params
+    try {
+      const foundUser = await User.findByPk(id, { raw: true })
+      if (!foundUser) throw new Error('沒有此使用者!')
+      const FavoritedRestaurants = getUser(req).FavoritedRestaurants
+      return cb(null, { FavoritedRestaurants })
+    } catch (error) {
+      return cb(error)
+    }
   }
 }
 
