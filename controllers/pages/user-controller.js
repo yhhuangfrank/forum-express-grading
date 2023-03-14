@@ -1,5 +1,4 @@
 // - 處理屬於user路由的相關請求
-const bcrypt = require('bcryptjs')
 const {
   User,
   Comment,
@@ -37,50 +36,12 @@ const userController = {
     req.flash('success_messages', '已成功登出!')
     return res.redirect('/signin')
   },
-  getUser: async (req, res, next) => {
-    const { id } = req.params
-    try {
-      const foundUser = await User.findByPk(id, { raw: true })
-
-      if (!foundUser) throw new Error('使用者不存在!')
-
-      // - 查詢跟目前  user 相關資訊
-      const [userData, userComments] = await Promise.all([
-        User.findByPk(id, {
-          include: [
-            {
-              model: Restaurant,
-              as: 'FavoritedRestaurants',
-              attributes: ['id', 'image']
-            },
-            { model: User, as: 'Followers', attributes: ['id', 'image'] },
-            { model: User, as: 'Followings', attributes: ['id', 'image'] }
-          ],
-          nest: true
-        }),
-        Comment.findAll({
-          include: [
-            { model: Restaurant, attributes: ['image'], required: true }
-          ],
-          attributes: [
-            [
-              sequelize.fn('DISTINCT', sequelize.col('Restaurant.id')),
-              'restaurantId'
-            ]
-          ],
-          where: { userId: id },
-          order: [['created_at', 'DESC']],
-          nest: true,
-          raw: true
-        })
-      ])
-      return res.render('users/profile', {
-        user: userData.toJSON(),
-        userComments
-      })
-    } catch (error) {
-      return next(error)
-    }
+  getUser: (req, res, next) => {
+    userServices.getUser(req, (err, data) => {
+      if (err) return next(err)
+      const { user, userComments } = data
+      return res.render('users/profile', { user, userComments })
+    })
   },
   editUser: async (req, res, next) => {
     const { id } = req.params

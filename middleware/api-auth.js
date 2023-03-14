@@ -4,12 +4,17 @@ const passport = require('passport')
 // - 封裝 api 使用的 JWT 驗證 middleware
 const authenticated = (req, res, next) => {
   passport.authenticate('jwt', { session: false }, (err, user) => {
-    if (err || !user) { return res.status(401).json({ status: 'error', message: 'unauthorized' }) }
+    if (err || !user) {
+      return res.status(401).json({ status: 'error', message: 'unauthorized' })
+    }
+    // - 因有在 middleware 中使用 callback function
+    // - 故需自行將 user 資料放入 req 中
+    req.user = user
     next()
   })(req, res, next)
 }
 const authenticatedAdmin = (req, res, next) => {
-  // - require passport 後 user 資料會存入 req.user
+  // - 從 req.user 取得 user 資料
   if (req.user && req.user.isAdmin) {
     return next()
   }
