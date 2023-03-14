@@ -67,6 +67,11 @@ const userController = {
     userServices.getFavoritedRestaurants(req, (err, data) =>
       err ? next(err) : res.json({ status: 'success', data })
     )
+  },
+  getCommentedRestaurants: (req, res, next) => {
+    userServices.getCommentedRestaurants(req, (err, data) =>
+      err ? next(err) : res.json({ status: 'success', data })
+    )
   }
 }
 

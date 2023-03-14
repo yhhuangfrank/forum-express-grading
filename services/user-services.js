@@ -210,8 +210,32 @@ const userServices = {
     try {
       const foundUser = await User.findByPk(id, { raw: true })
       if (!foundUser) throw new Error('沒有此使用者!')
-      const FavoritedRestaurants = getUser(req).FavoritedRestaurants
+      const { FavoritedRestaurants } = getUser(req)
       return cb(null, { FavoritedRestaurants })
+    } catch (error) {
+      return cb(error)
+    }
+  },
+  getCommentedRestaurants: async (req, cb) => {
+    const { id } = req.params
+    try {
+      const foundUser = await User.findByPk(id, { raw: true })
+      if (!foundUser) throw new Error('沒有此使用者!')
+      const commentedRestaurants = await Comment.findAll({
+        include: [{ model: Restaurant, required: true }],
+        attributes: [
+          [
+            sequelize.fn('DISTINCT', sequelize.col('Restaurant.id')),
+            'restaurantId'
+          ]
+        ],
+        where: { userId: id },
+        order: [['created_at', 'DESC']],
+        nest: true,
+        raw: true
+      })
+      commentedRestaurants.forEach(cr => delete cr.restaurantId)
+      return cb(null, { commentedRestaurants })
     } catch (error) {
       return cb(error)
     }
